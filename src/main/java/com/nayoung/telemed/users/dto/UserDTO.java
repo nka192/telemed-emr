@@ -19,17 +19,11 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDTO {
-
     private Long id;
-
     private String name;
-
     private String email;
-
     @JsonIgnore
     private String password;
-
     private String profilePictureUrl;
-
     private List<Role> roles;
 }
