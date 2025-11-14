@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResetPasswordRequest {
+
     // wil be used to request password reset
     private String email;
 

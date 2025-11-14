@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PasswordResetCode {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
