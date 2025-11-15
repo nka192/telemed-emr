@@ -41,7 +41,7 @@ public class JwtService { // generate and validate a token for a user
     }
 
     public String getUsernameFromToken(String token) {
-        return extractClaims(token, Claims::getSubject)
+        return extractClaims(token, Claims::getSubject);
     }
 
     private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction) {
