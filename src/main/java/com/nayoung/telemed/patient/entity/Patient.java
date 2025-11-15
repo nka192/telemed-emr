@@ -8,6 +8,7 @@ import com.nayoung.telemed.enums.Genotype;
 import com.nayoung.telemed.users.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "patients")
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
