@@ -15,10 +15,10 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "doctors")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "doctors")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Doctor {

@@ -15,11 +15,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "appointments")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "appointments")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Appointment {
