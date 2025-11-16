@@ -13,13 +13,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Service
+@Component
 @Slf4j
 @RequiredArgsConstructor
 public class AuthFilter extends OncePerRequestFilter { // first entry point of application (for any request coming to reach backend)
@@ -60,12 +60,12 @@ public class AuthFilter extends OncePerRequestFilter { // first entry point of a
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken); // get current logged-in user by using spring context
             }
+        }
 
-            try {
-                filterChain.doFilter(request, response); // move to next security implementation
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
+        try {
+            filterChain.doFilter(request, response); // move to next security implementation
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 
