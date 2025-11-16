@@ -20,7 +20,7 @@ public class JwtService { // generate and validate a token for a user
     @Value("${jwt.secret.string}")
     private String JWT_SECRET;
 
-    @Value("${jwt.expiration.time")
+    @Value("${jwt.expiration.time}")
     private long EXPIRATION_TIME;
 
     private SecretKey key;
