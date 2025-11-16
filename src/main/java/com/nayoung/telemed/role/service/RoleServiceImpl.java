@@ -6,7 +6,6 @@ import com.nayoung.telemed.role.entity.Role;
 import com.nayoung.telemed.role.repo.RoleRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -61,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .user(user)
                     .build();
 
-            notificationRepo.save(notificationToSave);
+             notificationRepo.save(notificationToSave);
 
         } catch (Exception e) {
             log.info(e.getMessage());
