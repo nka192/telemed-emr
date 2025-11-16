@@ -11,7 +11,7 @@ import java.util.List;
 public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
 
     // fetch appointment(s) of the doctor
-    List<Appointment> findByDoctor_User_IDOrderByIdDesc(Long userId);
+    List<Appointment> findByDoctor_User_IdOrderByIdDesc(Long userId);
 
     // fetch appointment(s) of the patient
     List<Appointment> findByPatient_User_IdOrderByIdDesc(Long userId);
