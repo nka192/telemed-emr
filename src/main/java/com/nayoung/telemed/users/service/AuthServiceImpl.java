@@ -125,12 +125,6 @@ public class AuthServiceImpl implements AuthService{
 
         // 6. return success response
         return success("Registration successful. A welcome email has been sent to you", savedUser.getEmail());
-
-//        return Response.<String>builder()
-//                .statusCode(200)
-//                .message("Registration successful. A welcome email has been sent to you")
-//                .data(savedUser.getEmail())
-//                .build();
     }
 
     @Override
@@ -152,12 +146,6 @@ public class AuthServiceImpl implements AuthService{
                 .build();
 
         return success("Login Successful", loginResponse);
-
-//        return Response.<LoginResponse>builder()
-//                .statusCode(200)
-//                .message("Login Successful")
-//                .data(loginResponse)
-//                .build();
     }
 
     @Override
@@ -192,16 +180,47 @@ public class AuthServiceImpl implements AuthService{
         notificationService.sendEmail(passwordResetEmail, user);
 
         return success("Password reset code sent to your email", null);
-
-//        return Response.builder()
-//                .statusCode(200)
-//                .message("Password reset code sent to your email")
-//                .build();
     }
 
     @Override
     public Response<?> updatePasswordViaResetCode(ResetPasswordRequest resetPasswordRequest) {
-        return null;
+        String code = resetPasswordRequest.getCode();
+        String newPassword = resetPasswordRequest.getNewPassword();
+
+        log.info("Code is: {}", code);
+        log.info("New password is: {}", newPassword);
+
+        // find and validate code
+        PasswordResetCode resetCode = passwordResetRepo.findByCode(code)
+                .orElseThrow(() -> new BadRequestException("Invalid reset code"));
+
+        // check expiration first
+        if (resetCode.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetRepo.delete(resetCode);
+            throw new BadRequestException("Reset code has expired");
+        }
+
+        // update password
+        User user = resetCode.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepo.save(user);
+
+        // delete the used reset code immediately after successful use
+        passwordResetRepo.delete(resetCode);
+
+        // send password confirmation email to user
+        NotificationDTO passwordResetEmail = NotificationDTO.builder()
+                .recipient(user.getEmail())
+                .subject("Password updated successfully")
+                .templateName("password-update-confirmation")
+                .templateVariables(Map.of(
+                        "name", user.getName()
+                ))
+                .build();
+
+        notificationService.sendEmail(passwordResetEmail, user);
+
+        return success("Password updated successfully", null);
     }
 
     private void createPatientProfile(User user) {
