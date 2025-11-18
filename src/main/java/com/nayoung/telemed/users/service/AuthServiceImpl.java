@@ -16,14 +16,18 @@ import com.nayoung.telemed.users.dto.LoginRequest;
 import com.nayoung.telemed.users.dto.LoginResponse;
 import com.nayoung.telemed.users.dto.RegistrationRequest;
 import com.nayoung.telemed.users.dto.ResetPasswordRequest;
+import com.nayoung.telemed.users.entity.PasswordResetCode;
 import com.nayoung.telemed.users.entity.User;
+import com.nayoung.telemed.users.repo.PasswordResetRepo;
 import com.nayoung.telemed.users.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +45,9 @@ public class AuthServiceImpl implements AuthService{
 
     private final PatientRepo patientRepo;
     private final DoctorRepo doctorRepo;
+
+    private final CodeGenerator codeGenerator;
+    private final PasswordResetRepo passwordResetRepo;
 
     @Value("${password.reset.link}")
     private String resetLink;
@@ -151,7 +158,39 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public Response<?> forgetPassword(String email) {
-        return null;
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User Not Found"));
+
+        passwordResetRepo.deleteByUserId(user.getId());
+
+        String code = codeGenerator.generateUniqueCode();
+
+        PasswordResetCode resetCode = PasswordResetCode.builder()
+                .user(user)
+                .code(code)
+                .expiryDate(calculateExpiryDate())
+                .used(false)
+                .build();
+
+        passwordResetRepo.save(resetCode);
+
+        // send email reset link to user
+        NotificationDTO passwordResetEmail = NotificationDTO.builder()
+                .recipient(user.getEmail())
+                .subject("Password Reset Code")
+                .templateName("password-reset")
+                .templateVariables(Map.of(
+                        "name", user.getName(),
+                        "resetLink", resetLink + code
+                ))
+                .build();
+
+        notificationService.sendEmail(passwordResetEmail, user);
+
+        return Response.builder()
+                .statusCode(200)
+                .message("Password reset code sent to your email")
+                .build();
     }
 
     @Override
@@ -191,5 +230,9 @@ public class AuthServiceImpl implements AuthService{
                 ))
                 .build();
         notificationService.sendEmail(welcomeEmail, user);
+    }
+
+    private LocalDateTime calculateExpiryDate() {
+        return LocalDateTime.now().plusHours(5);
     }
 }
