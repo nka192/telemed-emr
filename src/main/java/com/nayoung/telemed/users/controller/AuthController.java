@@ -4,6 +4,7 @@ import com.nayoung.telemed.res.Response;
 import com.nayoung.telemed.users.dto.LoginRequest;
 import com.nayoung.telemed.users.dto.LoginResponse;
 import com.nayoung.telemed.users.dto.RegistrationRequest;
+import com.nayoung.telemed.users.dto.ResetPasswordRequest;
 import com.nayoung.telemed.users.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Response<LoginResponse>> login(@RequestBody @Valid LoginRequest loginRequest) {
         return ResponseEntity.ok(authService.login(loginRequest));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Response<?>> forgetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        return ResponseEntity.ok(authService.forgetPassword(resetPasswordRequest.getEmail()));
     }
 }
