@@ -124,11 +124,13 @@ public class AuthServiceImpl implements AuthService{
         sendRegistrationEmail(request, savedUser);
 
         // 6. return success response
-        return Response.<String>builder()
-                .statusCode(200)
-                .message("Registration successful. A welcome email has been sent to you")
-                .data(savedUser.getEmail())
-                .build();
+        return success("Registration successful. A welcome email has been sent to you", savedUser.getEmail());
+
+//        return Response.<String>builder()
+//                .statusCode(200)
+//                .message("Registration successful. A welcome email has been sent to you")
+//                .data(savedUser.getEmail())
+//                .build();
     }
 
     @Override
@@ -149,11 +151,13 @@ public class AuthServiceImpl implements AuthService{
                 .token(token)
                 .build();
 
-        return Response.<LoginResponse>builder()
-                .statusCode(200)
-                .message("Login Successful")
-                .data(loginResponse)
-                .build();
+        return success("Login Successful", loginResponse);
+
+//        return Response.<LoginResponse>builder()
+//                .statusCode(200)
+//                .message("Login Successful")
+//                .data(loginResponse)
+//                .build();
     }
 
     @Override
@@ -187,10 +191,12 @@ public class AuthServiceImpl implements AuthService{
 
         notificationService.sendEmail(passwordResetEmail, user);
 
-        return Response.builder()
-                .statusCode(200)
-                .message("Password reset code sent to your email")
-                .build();
+        return success("Password reset code sent to your email", null);
+
+//        return Response.builder()
+//                .statusCode(200)
+//                .message("Password reset code sent to your email")
+//                .build();
     }
 
     @Override
@@ -234,5 +240,13 @@ public class AuthServiceImpl implements AuthService{
 
     private LocalDateTime calculateExpiryDate() {
         return LocalDateTime.now().plusHours(5);
+    }
+
+    private <T> Response<T> success(String message, T data) {
+        return Response.<T>builder()
+                .statusCode(200)
+                .message(message)
+                .data(data)
+                .build();
     }
 }
