@@ -1,6 +1,8 @@
 package com.nayoung.telemed.users.controller;
 
 import com.nayoung.telemed.res.Response;
+import com.nayoung.telemed.users.dto.LoginRequest;
+import com.nayoung.telemed.users.dto.LoginResponse;
 import com.nayoung.telemed.users.dto.RegistrationRequest;
 import com.nayoung.telemed.users.service.AuthService;
 import jakarta.validation.Valid;
@@ -21,5 +23,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Response<String>> register(@RequestBody @Valid RegistrationRequest registrationRequest) {
         return ResponseEntity.ok(authService.register(registrationRequest));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Response<LoginResponse>> login(@RequestBody @Valid LoginRequest loginRequest) {
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
 }
