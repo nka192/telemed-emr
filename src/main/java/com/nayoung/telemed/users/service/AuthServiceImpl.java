@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthService{
 
         boolean isDoctor = requestedRoleNames.contains("DOCTOR");
 
-        if (isDoctor && request.getLicenseNumber() == null || request.getLicenseNumber().isBlank()) {
+        if (isDoctor && (request.getLicenseNumber() == null || request.getLicenseNumber().isBlank())) {
             throw new BadRequestException("License number required to register as a doctor");
         }
 
