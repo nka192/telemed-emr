@@ -98,7 +98,7 @@ public class AuthServiceImpl implements AuthService{
                     log.info("Patient profile created: {}", savedUser.getEmail());
                     break;
 
-                case "Doctor":
+                case "DOCTOR":
                     createDoctorProfile(request, savedUser);
                     log.info("Doctor profile created: {}", savedUser.getEmail());
                     break;
