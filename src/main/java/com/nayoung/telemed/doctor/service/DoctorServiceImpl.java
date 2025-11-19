@@ -84,7 +84,7 @@ public class DoctorServiceImpl implements DoctorService{
     }
 
     @Override
-    public Response<List<DoctorDTO>> searchDoctorsBySpecialization(Specialization specialization) {
+    public Response<List<DoctorDTO>> getDoctorsBySpecialization(Specialization specialization) {
         List<Doctor> doctors = doctorRepo.findBySpecialization(specialization);
 
         List<DoctorDTO> doctorDTOS = doctors.stream()

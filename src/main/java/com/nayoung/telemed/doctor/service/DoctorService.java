@@ -11,6 +11,6 @@ public interface DoctorService {
     Response<?> updateDoctorProfile(DoctorDTO doctorDTO);
     Response<List<DoctorDTO>> getAllDoctors();
     Response<DoctorDTO> getDoctorById(Long doctorId);
-    Response<List<DoctorDTO>> searchDoctorsBySpecialization(Specialization specialization);
+    Response<List<DoctorDTO>> getDoctorsBySpecialization(Specialization specialization);
     Response<List<Specialization>> getAllSpecializationEnums();
 }
