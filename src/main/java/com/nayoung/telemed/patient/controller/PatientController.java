@@ -25,7 +25,8 @@ public class PatientController {
         return ResponseEntity.ok(patientService.getPatientProfile());
     }
 
-    @PutMapping("/update-profile")
+    @PutMapping("/me")
+    @PreAuthorize("hasAuthority('PATIENT')")
     public ResponseEntity<Response<?>> updatePatientProfile(@RequestBody PatientDTO patientDTO) {
         return ResponseEntity.ok(patientService.updatePatientProfile(patientDTO));
     }
@@ -38,7 +39,7 @@ public class PatientController {
     @GetMapping("/bloodgroup")
     public ResponseEntity<Response<List<BloodGroup>>> getAllBloodGroupEnums() {
         return ResponseEntity.ok(patientService.getAllBloodGroupEnums());
-    };
+    }
 
     @GetMapping("/genotype")
     public ResponseEntity<Response<List<Genotype>>> getAllGenotypeEnums() {
