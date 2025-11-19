@@ -34,7 +34,7 @@ public class PatientServiceImpl implements PatientService{
         User user = userService.getCurrentUser();
 
         Patient patient = patientRepo.findByUser(user)
-                .orElseThrow(() -> new BadRequestException("Patient not found"));
+                .orElseThrow(() -> new NotFoundException("Patient not found"));
 
         return success("Patient profile retrieved successfully", modelMapper.map(patient, PatientDTO.class));
     }
