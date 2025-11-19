@@ -89,7 +89,7 @@ public class PatientServiceImpl implements PatientService{
         List<BloodGroup> bloodGroups = Arrays.asList(BloodGroup.values());
 
 
-        return success("All bloodGroups retrieved successfully", bloodGroups);
+        return success("All blood groups retrieved successfully", bloodGroups);
     }
 
     @Override
