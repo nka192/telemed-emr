@@ -143,7 +143,7 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
-    public Response<AppointmentDTO> cancelAppointment(Long appointmentId) {
+    public Response<?> cancelAppointment(Long appointmentId) {
         User user = userService.getCurrentUser();
         Appointment appointment = appointmentRepo.findById(appointmentId)
                 .orElseThrow(() -> new NotFoundException("Appointment not found."));
