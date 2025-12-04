@@ -144,7 +144,27 @@ public class AppointmentServiceImpl implements AppointmentService{
 
     @Override
     public Response<AppointmentDTO> cancelAppointment(Long appointmentId) {
-        return null;
+        User user = userService.getCurrentUser();
+        Appointment appointment = appointmentRepo.findById(appointmentId)
+                .orElseThrow(() -> new NotFoundException("Appointment not found."));
+
+        // Add security check: only the patient or doctor involved can cancel
+        boolean isOwner = appointment.getPatient().getUser().getId().equals(user.getId()) ||
+                appointment.getDoctor().getUser().getId().equals(user.getId());
+        if (!isOwner) {
+            throw new BadRequestException("You do not have permission to cancel this appointment.");
+        }
+
+        // Update appointment status
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        Appointment savedAppointment = appointmentRepo.save(appointment);
+
+        // Send notification to the other party (doctor/patient)
+        // sendAppointmentCancellation(savedAppointment, user);
+
+        return success("Appointment cancelled successfully.", null);
+
+
     }
 
     @Override
