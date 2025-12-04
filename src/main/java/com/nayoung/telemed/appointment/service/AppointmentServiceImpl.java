@@ -160,11 +160,9 @@ public class AppointmentServiceImpl implements AppointmentService{
         Appointment savedAppointment = appointmentRepo.save(appointment);
 
         // Send notification to the other party (doctor/patient)
-        // sendAppointmentCancellation(savedAppointment, user);
+        sendAppointmentCancellation(savedAppointment, user);
 
         return success("Appointment cancelled successfully.", null);
-
-
     }
 
     @Override
@@ -221,6 +219,58 @@ public class AppointmentServiceImpl implements AppointmentService{
         // dispatch doctor email using the low-level service
         notificationService.sendEmail(doctorNotification, doctorUser);
         log.info("Dispatched confirmation email for doctor: {}", doctorUser.getEmail());
+    }
+
+    private void sendAppointmentCancellation(Appointment appointment, User cancellingUser) {
+
+        User patientUser = appointment.getPatient().getUser();
+        User doctorUser = appointment.getDoctor().getUser();
+
+        // Safety check to ensure the cancellingUser is involved
+        boolean isOwner = patientUser.getId().equals(cancellingUser.getId()) ||
+                doctorUser.getId().equals(cancellingUser.getId());
+        if (!isOwner) {
+            log.error("Cancellation initiated by user not associated with appointment. User Id: {}", cancellingUser);
+        }
+
+        String formattedTime = appointment.getStartTime().format(FORMATTER);
+        String cancellingPartyName = cancellingUser.getName();
+
+        // Common variables for the template
+        Map<String, Object> baseVars = new HashMap<>();
+        baseVars.put("cancellingPartyName", cancellingPartyName);
+        baseVars.put("appointmentTime", formattedTime);
+        baseVars.put("doctorName", appointment.getDoctor().getLastName());
+        baseVars.put("patientFullName", patientUser.getName());
+
+        // 1. Dispatch email to patient
+        Map<String, Object> patientVars = new HashMap<>(baseVars);
+        patientVars.put("recipientName", patientUser.getName());
+
+        NotificationDTO patientNotification = NotificationDTO.builder()
+                .recipient(patientUser.getEmail())
+                .subject("CareBridge: Your Appointment is Confirmed")
+                .templateName("appointment-cancellation")
+                .templateVariables(patientVars)
+                .build();
+
+        notificationService.sendEmail(patientNotification, patientUser);
+        log.info("Dispatched cancellation email to patient: {}", patientUser.getEmail());
+
+        // 2. Dispatch email to doctor
+        Map<String, Object> doctorVars = new HashMap<>(baseVars);
+        doctorVars.put("recipientName", doctorUser.getName());
+
+        NotificationDTO doctorNotification = NotificationDTO.builder()
+                .recipient(doctorUser.getEmail())
+                .subject("CareBridge: Appointment Cancellation")
+                .templateName("appointment-cancellation")
+                .templateVariables(doctorVars)
+                .build();
+
+        // dispatch doctor email using the low-level service
+        notificationService.sendEmail(doctorNotification, doctorUser);
+        log.info("Dispatched cancellation email to doctor: {}", doctorUser.getEmail());
     }
 
     private <T> Response<T> success(String message, T data) {
