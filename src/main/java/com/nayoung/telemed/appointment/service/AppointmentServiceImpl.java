@@ -17,6 +17,7 @@ import com.nayoung.telemed.users.entity.User;
 import com.nayoung.telemed.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,6 +37,7 @@ public class AppointmentServiceImpl implements AppointmentService{
     private final DoctorRepo doctorRepo;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final ModelMapper modelMapper;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy 'at' hh:mm a");
 
@@ -109,7 +111,35 @@ public class AppointmentServiceImpl implements AppointmentService{
 
     @Override
     public Response<List<AppointmentDTO>> getMyAppointments() {
-        return null;
+
+        User user = userService.getCurrentUser();
+        Long userId = user.getId();
+        List<Appointment> appointments;
+
+        // 1. Check if the user is doctor or patient
+        boolean isDoctor = user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("DOCTOR"));
+
+        if (isDoctor) {
+            // Check for doctor profile existence (required to throw the correct exception)
+            doctorRepo.findByUser(user)
+                    .orElseThrow(() -> new NotFoundException("Doctor profile not found"));
+            // Fetch appointments of the doctor efficiently
+            appointments = appointmentRepo.findByDoctor_User_IdOrderByIdDesc(userId);
+        } else {
+            // Check for patient profile existence
+            patientRepo.findByUser(user)
+                    .orElseThrow(() -> new NotFoundException("Patient profile not found"));
+            // Fetch appointments using the User Id to navigate patient relationship
+            appointments = appointmentRepo.findByPatient_User_IdOrderByIdDesc(userId);
+        }
+
+        // 2. Convert the list of entities to DTOs in a single step
+        List<AppointmentDTO> appointmentDTOList = appointments.stream()
+                .map(appointment -> modelMapper.map(appointment, AppointmentDTO.class))
+                .toList();
+
+        return success("Appointments retrieved successfully.", appointmentDTOList);
     }
 
     @Override
@@ -171,5 +201,13 @@ public class AppointmentServiceImpl implements AppointmentService{
         // dispatch doctor email using the low-level service
         notificationService.sendEmail(doctorNotification, doctorUser);
         log.info("Dispatched confirmation email for doctor: {}", doctorUser.getEmail());
+    }
+
+    private <T> Response<T> success(String message, T data) {
+        return Response.<T>builder()
+                .statusCode(200)
+                .message(message)
+                .data(data)
+                .build();
     }
 }
