@@ -17,7 +17,6 @@ import com.nayoung.telemed.users.entity.User;
 import com.nayoung.telemed.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,7 +35,6 @@ public class AppointmentServiceImpl implements AppointmentService{
     private final PatientRepo patientRepo;
     private final DoctorRepo doctorRepo;
     private final UserService userService;
-    private final ModelMapper modelMapper;
     private final NotificationService notificationService;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy 'at' hh:mm a");
@@ -68,7 +66,6 @@ public class AppointmentServiceImpl implements AppointmentService{
 
         // check for existing appointments whose END TIME overlaps with the proposed start time
         // or whose start time overlaps with the proposed end time
-
         List<Appointment> conflicts = appointmentRepo.findConflictingAppointments(
                 doctor.getId(),
                 checkStart,
@@ -151,17 +148,18 @@ public class AppointmentServiceImpl implements AppointmentService{
         notificationService.sendEmail(patientNotification, patientUser);
         log.info("Dispatched confirmation email for patient: {}", patientUser.getEmail());
 
-        // 1. prepare patient notification
-        User doctorUser = appointment.getPatient().getUser();
+        // 1. prepare doctor notification
+        User doctorUser = appointment.getDoctor().getUser();
 
         Map<String, Object> doctorVars = new HashMap<>();
 
-        patientVars.put("patientName", doctorUser.getName());
-        patientVars.put("patientFullName", patientUser.getName());
-        patientVars.put("appointmentTime", formattedTime);
-        patientVars.put("isVirtual", true);
-        patientVars.put("meetingLink", appointment.getMeetingLink());
-        patientVars.put("purposeOfConsultation", appointment.getPurposeOfConsultation());
+        doctorVars.put("doctorName", doctorUser.getName());
+        doctorVars.put("patientFullName", patientUser.getName());
+        doctorVars.put("appointmentTime", formattedTime);
+        doctorVars.put("isVirtual", true);
+        doctorVars.put("meetingLink", appointment.getMeetingLink());
+        doctorVars.put("initialSymptoms", appointment.getInitialSymptoms());
+        doctorVars.put("purposeOfConsultation", appointment.getPurposeOfConsultation());
 
         NotificationDTO doctorNotification = NotificationDTO.builder()
                 .recipient(doctorUser.getEmail())
@@ -171,7 +169,7 @@ public class AppointmentServiceImpl implements AppointmentService{
                 .build();
 
         // dispatch doctor email using the low-level service
-        notificationService.sendEmail(patientNotification, doctorUser);
+        notificationService.sendEmail(doctorNotification, doctorUser);
         log.info("Dispatched confirmation email for doctor: {}", doctorUser.getEmail());
     }
 }
