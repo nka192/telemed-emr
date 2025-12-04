@@ -148,7 +148,7 @@ public class AppointmentServiceImpl implements AppointmentService{
         notificationService.sendEmail(patientNotification, patientUser);
         log.info("Dispatched confirmation email for patient: {}", patientUser.getEmail());
 
-        // 1. prepare doctor notification
+        // 2. prepare doctor notification
         User doctorUser = appointment.getDoctor().getUser();
 
         Map<String, Object> doctorVars = new HashMap<>();
