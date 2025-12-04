@@ -130,7 +130,7 @@ public class AppointmentServiceImpl implements AppointmentService{
             // Check for patient profile existence
             patientRepo.findByUser(user)
                     .orElseThrow(() -> new NotFoundException("Patient profile not found"));
-            // Fetch appointments using the User Id to navigate patient relationship
+            // Fetch appointments using the User ID to navigate patient relationship
             appointments = appointmentRepo.findByPatient_User_IdOrderByIdDesc(userId);
         }
 
