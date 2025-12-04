@@ -167,7 +167,26 @@ public class AppointmentServiceImpl implements AppointmentService{
 
     @Override
     public Response<?> completeAppointment(Long appointmentId) {
-        return null;
+
+        // Get the current user (must be the Doctor)
+        User currentUser = userService.getCurrentUser();
+
+        // 1. Fetch the appointment
+        Appointment appointment = appointmentRepo.findById(appointmentId)
+                .orElseThrow(() -> new NotFoundException("Appointment not found with ID: " + appointmentId));
+
+        // Security check 1: ensure the current user is the doctor assigned to this appointment
+        if (!appointment.getDoctor().getUser().getId().equals(currentUser.getId())) {
+            throw new BadRequestException("Only the assigned doctor can mark this appointment as completed");
+        }
+
+        // 2. Update appointment status and end time
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointment.setEndTime(LocalDateTime.now());
+
+        appointmentRepo.save(appointment);
+
+        return success("Appointment successfully marked as completed. You may proceed to create the consultation notes.", null);
     }
 
     private void sendAppointmentConfirmation(Appointment appointment) {
