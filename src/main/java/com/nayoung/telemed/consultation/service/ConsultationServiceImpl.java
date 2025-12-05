@@ -66,7 +66,12 @@ public class ConsultationServiceImpl implements ConsultationService{
 
     @Override
     public Response<ConsultationDTO> getConsultationByAppointmentId(Long appointmentId) {
-        return null;
+        Consultation consultation = consultationRepo.findByAppointmentId(appointmentId)
+                .orElseThrow(() -> new NotFoundException("Consultation notes not found for appointment ID: " + appointmentId));
+
+        ConsultationDTO consultationDTO = modelMapper.map(consultation, ConsultationDTO.class);
+
+        return success("Consultation notes retrieved successfully", consultationDTO);
     }
 
     @Override
