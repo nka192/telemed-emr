@@ -8,6 +8,7 @@ import com.nayoung.telemed.consultation.repo.ConsultationRepo;
 import com.nayoung.telemed.enums.AppointmentStatus;
 import com.nayoung.telemed.exceptions.BadRequestException;
 import com.nayoung.telemed.exceptions.NotFoundException;
+import com.nayoung.telemed.patient.entity.Patient;
 import com.nayoung.telemed.patient.repo.PatientRepo;
 import com.nayoung.telemed.res.Response;
 import com.nayoung.telemed.users.entity.User;
@@ -76,7 +77,34 @@ public class ConsultationServiceImpl implements ConsultationService{
 
     @Override
     public Response<List<ConsultationDTO>> getConsultationHistoryByPatientId(Long patientId) {
-        return null;
+        User user = userService.getCurrentUser();
+
+        // 1. Check if patientId is null, retrieve the patientId of the current authenticated patient
+        if (patientId == null) {
+            Patient currentPatient = patientRepo.findByUser(user)
+                    .orElseThrow(() -> new BadRequestException("Patient profile not found for the current user."));
+            patientId = currentPatient.getId();
+        }
+
+        // Find the patient to ensure they exist (or to perform future security checks)
+        patientRepo.findById(patientId)
+                .orElseThrow(() -> new NotFoundException("Patient not found."));
+
+        List<Consultation> consultationHistory = consultationRepo.findByAppointmentPatientIdOrderByConsultationDateDesc(patientId);
+
+        if (consultationHistory.isEmpty()) {
+            return Response.<List<ConsultationDTO>>builder()
+                    .statusCode(200)
+                    .message("No consultation history found for this patient.")
+                    .data(List.of())
+                    .build();
+        }
+
+        List<ConsultationDTO> consultationHistoryDTOs = consultationHistory.stream()
+                .map(consultation -> modelMapper.map(consultation, ConsultationDTO.class))
+                .toList();
+
+        return success("Consultation history retrieved successfully", consultationHistoryDTOs);
     }
 
     private <T> Response<T> success(String message, T data) {
