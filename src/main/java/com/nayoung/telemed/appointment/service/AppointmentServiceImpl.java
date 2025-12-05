@@ -103,10 +103,7 @@ public class AppointmentServiceImpl implements AppointmentService{
 
         sendAppointmentConfirmation(savedAppointment);
 
-        return Response.<AppointmentDTO>builder()
-                .statusCode(200)
-                .message("Appointment booked successfully")
-                .build();
+        return success("Appointment booked successfully", null);
     }
 
     @Override
