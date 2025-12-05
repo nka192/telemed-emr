@@ -6,6 +6,7 @@ import com.nayoung.telemed.res.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class AppointmentController {
     }
 
     @PutMapping("/complete/{appointmentId}")
+    @PreAuthorize(("hasAuthority('DOCTOR')"))
     public ResponseEntity<Response<?>> completeAppointment(@PathVariable Long appointmentId) {
         return ResponseEntity.ok(appointmentService.completeAppointment(appointmentId));
     }
